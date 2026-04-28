@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyBestFit Prototype</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 24px;
+      color: #334155;
+    }
+    .phone {
+      width: 390px;
+      height: 820px;
+      background: white;
+      border: 10px solid #1e293b;
+      border-radius: 42px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 25px 60px rgba(15, 23, 42, .3);
+    }
+    .status { height: 28px; background: #1e293b; }
+    .topbar {
+      background: linear-gradient(90deg, #cffafe, #fce7f3, #ffe4e6);
+      border-bottom: 1px solid #e2e8f0;
+      padding: 12px 16px;
+    }
+    .top-row { display: flex; align-items: center; justify-content: space-between; }
+    .circle-btn {
+      width: 36px; height: 36px; border-radius: 999px;
+      border: 0; background: rgba(255,255,255,.7);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: #334155;
+    }
+    .brand { font-size: 24px; font-weight: 700; letter-spacing: .4px; color: #334155; }
+    .title { text-align: center; margin-top: 10px; font-size: 20px; font-weight: 600; color: #475569; }
+    .content {
+      height: 690px;
+      overflow-y: auto;
+      padding: 20px;
+      padding-bottom: 92px;
+      background: white;
+    }
+    .bottom-nav {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 70px; background: white; border-top: 1px solid #e2e8f0;
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      align-items: center; padding: 8px 18px;
+    }
+    .nav-btn {
+      border: 0; background: transparent; cursor: pointer;
+      color: #64748b; font-size: 12px; display: flex; flex-direction: column;
+      align-items: center; gap: 3px;
+    }
+    .nav-btn.active { color: #0f172a; font-weight: 700; }
+    .nav-icon { font-size: 20px; }
+    button { font-family: inherit; }
+    .tabs { display: flex; border: 1px solid #e2e8f0; border-radius: 18px; overflow: hidden; margin-bottom: 22px; }
+    .tab { flex: 1; padding: 12px; border: 0; background: white; cursor: pointer; font-weight: 600; color: #64748b; }
+    .tab.active { background: #f1f5f9; color: #0f172a; }
+    label { display: block; margin-bottom: 14px; text-align: left; }
+    .label { font-size: 14px; font-weight: 600; margin-bottom: 7px; color: #475569; }
+    input, select {
+      width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1;
+      border-radius: 12px; outline: none; font-size: 14px; background: white;
+    }
+    input:focus, select:focus { border-color: #f9a8d4; box-shadow: 0 0 0 3px rgba(249,168,212,.25); }
+    .error { font-size: 12px; color: #e11d48; margin-top: 5px; }
+    .btn {
+      border: 0; border-radius: 16px; padding: 12px 16px; font-weight: 700;
+      cursor: pointer; background: #f1f5f9; color: #334155;
+    }
+    .primary { background: linear-gradient(90deg, #fbcfe8, #ddd6fe); color: #334155; }
+    .disabled { background: #e2e8f0; color: #94a3b8; }
+    .outline { background: white; border: 1px solid #cbd5e1; }
+    .full { width: 100%; }
+    .muted { color: #64748b; font-size: 14px; }
+    .center { text-align: center; }
+    .space { height: 14px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .card {
+      border: 1px solid #e2e8f0; border-radius: 18px; padding: 14px; background: white;
+    }
+    .soft { background: #f8fafc; }
+    .pink { background: linear-gradient(90deg, #fdf2f8, #f5f3ff); }
+    .card-btn {
+      text-align: left; width: 100%; cursor: pointer;
+      border: 1px solid #e2e8f0; border-radius: 18px; padding: 14px; background: white;
+    }
+    .card-btn:hover { box-shadow: 0 8px 18px rgba(15,23,42,.08); }
+    .emoji { font-size: 38px; line-height: 1; margin-bottom: 10px; }
+    .mini-emoji { font-size: 50px; line-height: 1; margin-bottom: 10px; }
+    .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .pill {
+      display: inline-block; padding: 8px 12px; border-radius: 999px;
+      border: 1px solid #e2e8f0; background: #faf5ff; font-size: 13px; margin: 4px;
+    }
+    .fav { float: right; border: 0; background: transparent; font-size: 18px; cursor: pointer; }
+    .toast {
+      position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+      z-index: 100; background: #0f172a; color: white; padding: 10px 16px;
+      border-radius: 999px; font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,.25);
+      display: none;
+    }
+    .mannequin-box {
+      width: 240px; margin: 0 auto 20px; border: 1px solid #e2e8f0;
+      border-radius: 28px; background: linear-gradient(#ecfeff, #fdf2f8, #f5f3ff);
+      padding: 20px;
+    }
+    .mannequin-stage { height: 320px; display: flex; align-items: center; justify-content: center; }
+    .mannequin { display: flex; flex-direction: column; align-items: center; position: relative; }
+    .neck { width: 26px; height: 18px; background: #cbd5e1; border-radius: 8px 8px 4px 4px; }
+    .torso {
+      width: 112px; height: 158px; background: #cbd5e1;
+      border-radius: 52px 52px 22px 22px; position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .arms { position:absolute; top: 42px; width: 172px; height: 120px; pointer-events:none; }
+    .arm { position:absolute; width: 22px; height: 118px; background:#cbd5e1; border-radius: 18px; }
+    .arm.left { left: 0; transform: rotate(8deg); }
+    .arm.right { right: 0; transform: rotate(-8deg); }
+    .clothing {
+      position: absolute; top: 35px; width: 94px; height: 92px;
+      background: #334155; border-radius: 16px 16px 24px 24px;
+    }
+    .clothing.dress { height: 124px; width: 105px; top: 30px; clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%); border-radius: 14px; background:#9f1239; }
+    .clothing.top { height: 75px; width: 96px; top: 38px; background:#334155; }
+    .clothing.pants { height: 105px; width: 92px; top: 92px; background:#475569; border-radius: 14px; clip-path: polygon(0 0,100% 0,78% 100%,58% 100%,50% 38%,42% 100%,22% 100%); }
+    .clothing.jacket { height: 105px; width: 108px; top: 34px; background:#1e293b; border-radius: 12px; }
+    .legs { display:flex; gap: 10px; margin-top: 6px; }
+    .leg { width: 32px; height: 92px; background:#cbd5e1; border-radius: 0 0 15px 15px; }
+    .foot-row { display:flex; gap: 8px; margin-top: 3px; }
+    .foot { width: 36px; height: 10px; background:#cbd5e1; border-radius: 999px; }
+    .screen-fade { animation: fade .18s ease; }
+    @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <div class="toast" id="toast"></div>
+  <div class="phone">
+    <div class="status"></div>
+    <div class="topbar">
+      <div class="top-row">
+        <button class="circle-btn" onclick="back()">‹</button>
+        <div class="brand">MyBestFit</div>
+        <button class="circle-btn">☰</button>
+      </div>
+      <div class="title" id="title"></div>
+    </div>
+    <div id="app" class="content screen-fade"></div>
+    <div class="bottom-nav" id="bottomNav"></div>
+  </div>
+
+<script>
+const state = {
+  screen: "auth",
+  authMode: "login",
+  likes: ["casual", "work"],
+  toast: "",
+  selectedTryOnItem: null,
+  savedMeasurements: null,
+  measurements: { height: `5'6"`, weight: "130 lbs", bust: "36 in", bodyShape: "Hourglass", fitPreference: "Comfort Fit" },
+  q1: "simple",
+  q2: "casual"
+};
+
+const outfitCards = [
+  { id: "date", name: "Date Night Look", price: "$98", icon: "👗" },
+  { id: "casual", name: "Casual Outfit", price: "$42", icon: "👕" },
+  { id: "work", name: "Workwear", price: "$145", icon: "🧥" }
+];
+
+const shopItems = [
+  { id: "dress", name: "Dress", price: "$98", icon: "👗", category: "Dresses", favoriteId: "date" },
+  { id: "top", name: "Top", price: "$42", icon: "👚", category: "Tops", favoriteId: "casual" },
+  { id: "pants", name: "Pants", price: "$65", icon: "👖", category: "Pants", favoriteId: "travel" },
+  { id: "jacket", name: "Jacket", price: "$120", icon: "🧥", category: "Jackets", favoriteId: "work" }
+];
+
+let historyStack = [];
+let shopFilter = "All";
+
+function go(screen) {
+  historyStack.push(state.screen);
+  state.screen = screen;
+  render();
+}
+
+function back() {
+  const prev = historyStack.pop();
+  if (prev) state.screen = prev;
+  else state.screen = "home";
+  render();
+}
+
+function toast(message) {
+  const el = document.getElementById("toast");
+  el.textContent = message;
+  el.style.display = "block";
+  setTimeout(() => { el.style.display = "none"; }, 2200);
+}
+
+function activeNav(screen) {
+  if (screen === "tryon" || screen.includes("avatar") || screen === "virtualtryon") return "tryon";
+  if (screen === "favorites") return "favorites";
+  if (screen === "shop") return "shop";
+  return "home";
+}
+
+function nav() {
+  const current = activeNav(state.screen);
+  document.getElementById("bottomNav").innerHTML = [
+    ["home", "⌂", "Home"],
+    ["tryon", "✧", "Try On"],
+    ["favorites", "♡", "Favorites"],
+    ["shop", "▢", "Shop"]
+  ].map(([id, icon, label]) => `
+    <button class="nav-btn ${current === id ? "active" : ""}" onclick="go('${id}')">
+      <span class="nav-icon">${icon}</span><span>${label}</span>
+    </button>
+  `).join("");
+}
+
+function setTitle(t) { document.getElementById("title").textContent = t || ""; }
+
+function input(label, id, type="text", value="") {
+  return `<label><div class="label">${label}</div><input id="${id}" type="${type}" value="${value}"></label>`;
+}
+
+function saveMeasurementsFromForm(entryMode) {
+  const data = {
+    height: document.getElementById("height").value,
+    weight: document.getElementById("weight").value,
+    bust: document.getElementById("bust").value,
+    bodyShape: document.getElementById("bodyShape").value,
+    fitPreference: document.getElementById("fitPreference").value
+  };
+  if (!data.height || !data.weight || !data.bust) {
+    toast("Fill out your measurements first");
+    return;
+  }
+  state.measurements = data;
+  state.savedMeasurements = data;
+  toast(entryMode === "avatar" ? "Measurements saved for avatar" : "Measurements saved");
+  go(entryMode === "avatar" ? "avatarresult" : "sizeresult");
+}
+
+function toggleLike(id) {
+  if (state.likes.includes(id)) state.likes = state.likes.filter(x => x !== id);
+  else state.likes.push(id);
+  render();
+}
+
+function addToFavorites(id, name) {
+  if (!state.likes.includes(id)) state.likes.push(id);
+  toast(`${name} added to bag and favorites`);
+  render();
+}
+
+function render() {
+  nav();
+  const app = document.getElementById("app");
+  app.className = "content screen-fade";
+
+  if (state.screen === "auth") return auth(app);
+  if (state.screen === "forgot") return forgot(app);
+  if (state.screen === "home") return home(app);
+  if (state.screen === "findfit") return findFit(app, "fit");
+  if (state.screen === "avatarmeasurements") return findFit(app, "avatar");
+  if (state.screen === "sizeresult") return sizeResult(app);
+  if (state.screen === "explore") return explore(app);
+  if (state.screen === "quizintro") return quizIntro(app);
+  if (state.screen === "quiz1") return quizQuestion(app, 1);
+  if (state.screen === "quiz2") return quizQuestion(app, 2);
+  if (state.screen === "quizresults") return quizResults(app);
+  if (state.screen === "tryon") return tryOn(app);
+  if (state.screen === "avatarhome") return avatarHome(app);
+  if (state.screen === "avataroptions") return avatarOptions(app);
+  if (state.screen === "avatarresult") return avatarResult(app);
+  if (state.screen === "avatarloading") return avatarLoading(app);
+  if (state.screen === "favorites") return favorites(app);
+  if (state.screen === "shop") return shop(app);
+  if (state.screen === "virtualtryon") return virtualTryOn(app);
+}
+
+function auth(app) {
+  setTitle("");
+  const isLogin = state.authMode === "login";
+  app.innerHTML = `
+    <div class="tabs">
+      <button class="tab ${isLogin ? "active" : ""}" onclick="state.authMode='login'; render()">Login</button>
+      <button class="tab ${!isLogin ? "active" : ""}" onclick="state.authMode='signup'; render()">Sign Up</button>
+    </div>
+    ${isLogin ? `
+      ${input("Email", "loginEmail", "email")}
+      ${input("Password", "loginPassword", "password")}
+      <button class="btn primary full" onclick="toast('Welcome back'); go('home')">Login</button>
+      <button class="btn full outline" onclick="go('forgot')">Forgot password?</button>
+      <p class="center muted">Don't have an account? <b onclick="state.authMode='signup'; render()" style="cursor:pointer">Sign Up</b></p>
+    ` : `
+      ${input("Name", "signupName")}
+      ${input("Email", "signupEmail", "email")}
+      ${input("Password", "signupPassword", "password")}
+      ${input("Confirm Password", "signupConfirm", "password")}
+      <button class="btn primary full" onclick="toast('Account created successfully'); go('home')">Create Account</button>
+      <p class="center muted">Already have an account? <b onclick="state.authMode='login'; render()" style="cursor:pointer">Login</b></p>
+    `}
+  `;
+}
+
+function forgot(app) {
+  setTitle("");
+  app.innerHTML = `
+    ${input("Email", "resetEmail", "email")}
+    <p class="muted">Enter your email address below to reset your password.</p>
+    <button class="btn primary full" onclick="toast('Reset link sent')">Send Reset Link</button>
+    <p class="center muted">Remembered your password? <b onclick="go('auth')" style="cursor:pointer">Login</b></p>
+  `;
+}
+
+function home(app) {
+  setTitle("Welcome back!");
+  app.innerHTML = `
+    <p class="muted">Find the right fit. Discover your style.</p>
+    <h3>Start Here</h3>
+    <div class="grid2">
+      <button class="card-btn" onclick="go('findfit')"><div class="emoji">📏</div><b>Find Your Fit</b><p class="muted">Get size recommendations for your body shape.</p><span class="pill">Find My Fit</span></button>
+      <button class="card-btn" onclick="go('explore')"><div class="emoji">✨</div><b>Discover Styles</b><p class="muted">Explore outfit ideas that match your taste.</p><span class="pill">Explore Styles</span></button>
+    </div>
+    <h3>Save Time</h3>
+    <div class="grid2">
+      <button class="card-btn" onclick="go('shop')"><div class="emoji">🛍️</div><b>Quick Shopping</b><p class="muted">Build outfits in minutes with smart picks.</p><span class="pill">Shop Now</span></button>
+      <button class="card-btn" onclick="go('quizintro')"><div class="emoji">📝</div><b>Style Quiz</b><p class="muted">Take a quick quiz for tailored outfit ideas.</p><span class="pill">Start Quiz</span></button>
+    </div>
+    <h3>Recommended for You</h3>
+    <div class="grid3">
+      ${outfitCards.map(item => `
+        <div class="card">
+          <button class="fav" onclick="toggleLike('${item.id}')">${state.likes.includes(item.id) ? "💗" : "🤍"}</button>
+          <div class="emoji">${item.icon}</div>
+          <b style="font-size:13px">${item.name}</b>
+        </div>`).join("")}
+    </div>
+  `;
+}
+
+function findFit(app, entryMode) {
+  setTitle("Find My Fit");
+  const m = state.savedMeasurements || state.measurements;
+  app.innerHTML = `
+    <p class="muted">${entryMode === "avatar" ? "Enter your body measurements to build an avatar that matches your shape." : "Enter your body measurements to get personalized clothing size recommendations."}</p>
+    ${state.savedMeasurements ? `
+      <div class="card pink">
+        <b>Saved measurements found</b>
+        <p class="muted">Your saved measurements are already loaded. You can edit them or keep them as is.</p>
+        <button class="btn outline full" onclick="toast('Saved measurements loaded')">Use Saved Measurements</button>
+      </div><div class="space"></div>` : ""}
+    ${input("Height", "height", "text", m.height)}
+    ${input("Weight", "weight", "text", m.weight)}
+    ${input("Bust", "bust", "text", m.bust)}
+    <div class="grid2">
+      <label><div class="label">Body Shape</div><select id="bodyShape">
+        ${["Hourglass","Pear","Rectangle"].map(x => `<option ${m.bodyShape===x?"selected":""}>${x}</option>`).join("")}
+      </select></label>
+      <label><div class="label">Fit Preference</div><select id="fitPreference">
+        ${["Comfort Fit","Regular Fit","Fitted"].map(x => `<option ${m.fitPreference===x?"selected":""}>${x}</option>`).join("")}
+      </select></label>
+    </div>
+    <div class="grid2">
+      <button class="btn outline" onclick="saveMeasurementsFromForm('${entryMode}')">Save Measurements</button>
+      <button class="btn primary" onclick="saveMeasurementsFromForm('${entryMode}')">${entryMode === "avatar" ? "Create Avatar" : "See My Size"}</button>
+    </div>
+    <div class="space"></div>
+    <div class="card soft">
+      <div class="row"><span style="font-size:32px">▥</span><div><b>AI Body Scan</b><p class="muted">Scan your body with AI to automatically get measurements and body type.</p></div></div>
+      <button class="btn outline full" onclick="go('avataroptions')">Start Scan</button>
+    </div>
+  `;
+}
+
+function sizeResult(app) {
+  setTitle("Your Best Fit");
+  app.innerHTML = `
+    <div class="center">
+      <div class="mini-emoji">📏</div>
+      <h2>Recommended Size: M</h2>
+      <p class="muted">Based on your measurements, comfort fit preferences, and body shape.</p>
+    </div>
+    <div class="grid3">
+      <div class="card soft center"><b>Tops</b><br>Medium</div>
+      <div class="card soft center"><b>Dresses</b><br>8 / M</div>
+      <div class="card soft center"><b>Pants</b><br>6 / 28</div>
+    </div>
+    <div class="space"></div>
+    <div class="grid2">
+      <button class="btn primary" onclick="go('shop')">Shop My Size</button>
+      <button class="btn outline" onclick="state.selectedTryOnItem=shopItems[0]; go('virtualtryon')">Try It On</button>
+    </div>
+  `;
+}
+
+function explore(app) {
+  setTitle("Explore Styles");
+  const cats = [
+    ["Date Night","💃","date"], ["Workwear","💼","work"], ["Travel","✈️","travel"], ["Casual","👟","casual"]
+  ];
+  app.innerHTML = `
+    <p class="muted">Explore outfits tailored for you based on your style and body shape.</p>
+    <div><span class="pill">By Occasion</span><span class="pill">By Body Shape</span><span class="pill">Color Palette</span></div>
+    <div class="grid2" style="margin-top:12px">
+      ${cats.map(([name, icon, id]) => `
+        <button class="card-btn" onclick="toggleLike('${id}')">
+          <div class="mini-emoji">${icon}</div><b>${name}</b><p class="muted">Tap to save ideas</p>
+          <span>${state.likes.includes(id) ? "💗 Saved" : "🤍 Save"}</span>
+        </button>`).join("")}
+    </div>
+  `;
+}
+
+function quizIntro(app) {
+  setTitle("Style Quiz");
+  app.innerHTML = `
+    <div class="center">
+      <p class="muted">Take a quick quiz to get personalized outfit ideas based on your preferences.</p>
+      <div class="mini-emoji" style="font-size:80px">📋</div>
+      <button class="btn primary full" onclick="go('quiz1')">Start Quiz</button>
+    </div>
+  `;
+}
+
+function quizQuestion(app, num) {
+  setTitle("Style Quiz");
+  const opts = num === 1
+    ? [["simple","Simple & Casual","🩵"],["modern","Modern & Chic","🖤"],["feminine","Feminine & Flirty","💗"]]
+    : [["casual","Casual","🤍"],["trendy","Trendy","💜"],["elegant","Elegant","💙"]];
+  const selected = num === 1 ? state.q1 : state.q2;
+  app.innerHTML = `
+    <p class="center muted">${num === 1 ? "Let's find your style! Which of these looks most like your go-to?" : "Which of these outfit styles is your favorite?"}</p>
+    <div class="grid3">
+      ${opts.map(([id, title, icon]) => `
+        <button class="card-btn center" style="${selected===id?"box-shadow:0 0 0 2px #f9a8d4;background:#fdf2f8":""}" onclick="state.${num===1?"q1":"q2"}='${id}'; render()">
+          <div class="mini-emoji">${icon}</div><b style="font-size:13px">${title}</b>
+        </button>`).join("")}
+    </div>
+    <div class="space"></div>
+    <div class="grid2">
+      <button class="btn outline" onclick="go('${num===1?"quizintro":"quiz1"}')">Previous</button>
+      <button class="btn primary" onclick="go('${num===1?"quiz2":"quizresults"}')">Next</button>
+    </div>
+  `;
+}
+
+function quizResults(app) {
+  setTitle("Style Quiz Results");
+  app.innerHTML = `
+    <div class="center">
+      <div class="mini-emoji">🩵</div>
+      <h2>You're Casual Chic!</h2>
+      <p class="muted">Based on your quiz, your style is comfortable yet sophisticated, with a modern casual vibe.</p>
+      <button class="btn primary" onclick="go('shop')">Shop Casual Chic</button>
+      <p class="muted">Personalized outfit ideas are ready for you. Let's start shopping!</p>
+    </div>
+  `;
+}
+
+function tryOn(app) {
+  setTitle("Try On");
+  app.innerHTML = `
+    <p class="muted">Virtually try on outfits and see how they look on you.</p>
+    <div class="grid2">
+      <button class="btn outline">📷 Upload a Photo</button>
+      <button class="btn outline" onclick="go('avatarhome')">Create Avatar</button>
+    </div>
+    ${state.selectedTryOnItem ? `<div class="space"></div><button class="card-btn pink" onclick="go('virtualtryon')"><b>Continue last try-on</b><p class="muted">See your avatar wearing ${state.selectedTryOnItem.name}</p></button>` : ""}
+    <div class="space"></div>
+    <div class="card soft">
+      <div class="row"><span style="font-size:44px">▥</span><div><b>Upload Photo</b><p class="muted">Upload a clear, full-body photo with a neutral background.</p></div></div>
+      <button class="btn outline full">Upload Photo</button>
+    </div>
+    <h3>Recently Tried On</h3>
+    <div class="grid3">${outfitCards.map(x => `<div class="card"><div class="emoji">${x.icon}</div><b style="font-size:12px">${x.name}</b></div>`).join("")}</div>
+  `;
+}
+
+function avatarHome(app) {
+  setTitle("Create Avatar");
+  app.innerHTML = `
+    <div class="center">
+      <div><span class="pill">Find My Fit</span><span class="pill">Explore Styles</span><span class="pill">Start a Quiz</span></div>
+      <p class="muted">Transform yourself into a custom 3D avatar.</p>
+      <div class="mannequin-box"><div class="mannequin-stage">${mannequinHtml()}</div></div>
+      <button class="btn primary full" onclick="go('avataroptions')">Create Avatar</button>
+    </div>
+  `;
+}
+
+function avatarOptions(app) {
+  setTitle("Create Avatar");
+  app.innerHTML = `
+    <p class="muted">Choose how you'd like to set up your avatar.</p>
+    <button class="card-btn pink" onclick="go('avatarmeasurements')"><b>Enter Measurements Manually</b><p class="muted">Input your body measurements and create avatar</p></button>
+    <div class="space"></div>
+    ${state.savedMeasurements ? `<button class="card-btn" onclick="go('avatarresult')"><b>Use Saved Measurements</b><p class="muted">Create your avatar instantly from saved measurements</p></button><div class="space"></div>` : ""}
+    <button class="card-btn" onclick="go('avatarloading')"><b>AI Body Scan</b><p class="muted">Scan your body with AI to automatically get your measurements</p></button>
+  `;
+}
+
+function avatarLoading(app) {
+  setTitle("Setting Up Your Avatar...");
+  app.innerHTML = `
+    <div class="center">
+      <div class="mannequin-box"><div class="mannequin-stage">${mannequinHtml()}</div></div>
+      <h3>This will only take a moment</h3>
+      <p class="muted">Creating your personalized avatar...</p>
+    </div>
+  `;
+  setTimeout(() => { if (state.screen === "avatarloading") { toast("Avatar created successfully"); go("avatarresult"); } }, 1400);
+}
+
+function avatarResult(app) {
+  setTitle("Your Avatar");
+  const m = state.savedMeasurements || state.measurements;
+  app.innerHTML = `
+    <div class="center">
+      <div class="mannequin-box"><div class="mannequin-stage">${mannequinHtml()}</div></div>
+      <b>Custom avatar generated</b>
+      <p class="muted">Based on your saved body measurements</p>
+    </div>
+    <div class="grid2">
+      <div class="card soft"><b>Height</b><br>${m.height}</div>
+      <div class="card soft"><b>Weight</b><br>${m.weight}</div>
+      <div class="card soft"><b>Bust</b><br>${m.bust}</div>
+      <div class="card soft"><b>Body Shape</b><br>${m.bodyShape}</div>
+    </div>
+    <div class="space"></div>
+    <div class="grid2">
+      <button class="btn primary" onclick="state.selectedTryOnItem=shopItems[1]; go('virtualtryon')">Use This Avatar</button>
+      <button class="btn outline" onclick="go('avataroptions')">Back</button>
+    </div>
+  `;
+}
+
+function favorites(app) {
+  setTitle("Favorites");
+  const map = {
+    date: { name: "Chic Dress", price: "$120", icon: "👗" },
+    casual: { name: "Cozy Sweater", price: "$68", icon: "🧶" },
+    work: { name: "Work Outfit", price: "$145", icon: "🧥" },
+    travel: { name: "Travel Set", price: "$88", icon: "👜" }
+  };
+  const items = state.likes.map(id => ({id, ...map[id]})).filter(x => x.name);
+  app.innerHTML = `
+    <p class="muted">Your liked items in one place.</p>
+    <div class="grid3">
+      ${items.length ? items.map(item => `<div class="card"><button class="fav" onclick="toggleLike('${item.id}')">💗</button><div class="mini-emoji">${item.icon}</div><b>${item.name}</b><br><span class="muted">${item.price}</span></div>`).join("") : `<div class="card center" style="grid-column:1/-1">No favorites yet.</div>`}
+    </div>
+  `;
+}
+
+function shop(app) {
+  setTitle("Shop");
+  const cats = ["All","Dresses","Tops","Pants","Jackets"];
+  const visible = shopFilter === "All" ? shopItems : shopItems.filter(i => i.category === shopFilter);
+  app.innerHTML = `
+    <p class="muted">Browse and shop the latest fashion styles.</p>
+    <div>${cats.map(c => `<button class="btn ${shopFilter===c?"primary":"outline"}" onclick="shopFilter='${c}'; render()">${c}</button>`).join("")}</div>
+    <div class="grid2" style="margin-top:12px">
+      ${visible.map((item, idx) => `
+        <div class="card">
+          <button class="fav" onclick="toggleLike('${item.favoriteId}')">${state.likes.includes(item.favoriteId) ? "💗" : "🤍"}</button>
+          <div class="mini-emoji">${item.icon}</div><b>${item.name}</b><br><span class="muted">${item.price}</span>
+          <div class="grid2" style="margin-top:12px">
+            <button class="btn outline" onclick="state.selectedTryOnItem=shopItems.find(x=>x.id==='${item.id}'); toast('${item.name} is ready to try on'); go('virtualtryon')">Try It On</button>
+            <button class="btn" onclick="addToFavorites('${item.favoriteId}','${item.name}')">Add to Bag</button>
+          </div>
+        </div>`).join("")}
+    </div>
+  `;
+}
+
+function mannequinHtml(clothingClass = "") {
+  return `
+    <div class="mannequin">
+      <div class="neck"></div>
+      <div class="torso">
+        <div class="arms"><div class="arm left"></div><div class="arm right"></div></div>
+        ${clothingClass ? `<div class="clothing ${clothingClass}"></div>` : ""}
+      </div>
+      <div class="legs"><div class="leg"></div><div class="leg"></div></div>
+      <div class="foot-row"><div class="foot"></div><div class="foot"></div></div>
+    </div>
+  `;
+}
+
+function virtualTryOn(app) {
+  setTitle("Virtual Try-On");
+  const item = state.selectedTryOnItem || shopItems[0];
+  const shape = (state.savedMeasurements || state.measurements).bodyShape || "Custom";
+  const clothingClass = item.id === "dress" ? "dress" : item.id === "pants" ? "pants" : item.id === "jacket" ? "jacket" : "top";
+  app.innerHTML = `
+    <p class="center muted">Your avatar trying this item on.</p>
+    <div class="mannequin-box">
+      <div class="center muted" style="font-size:12px;margin-bottom:8px">Body Shape: ${shape}</div>
+      <div class="mannequin-stage">${mannequinHtml(clothingClass)}</div>
+    </div>
+    <div class="card">
+      <b>Try-On Preview</b>
+      <p>${item.name}</p>
+      <p class="muted">Fit based on your measurements</p>
+    </div>
+    <div class="space"></div>
+    <div class="grid2">
+      <button class="btn outline" onclick="go('shop')">Change Item</button>
+      <button class="btn primary" onclick="addToFavorites('${item.favoriteId || "date"}','${item.name}'); go('favorites')">Save Look</button>
+    </div>
+  `;
+}
+
+render();
+</script>
+</body>
+</html>
